@@ -1,0 +1,509 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Олег Тетченко | Кинезиолог, Остеопракт, Нутрициолог</title>
+
+    <!-- React & ReactDOM -->
+    <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+
+    <!-- Babel for JSX -->
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@300;400;500;600&family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&display=swap" rel="stylesheet">
+
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+
+    <style>
+        body {
+            font-family: 'Manrope', sans-serif;
+            background-color: #F8FAFC;
+            color: #334155;
+            scroll-behavior: smooth;
+        }
+        h1, h2, h3, h4, h5, h6 {
+            font-family: 'Playfair Display', serif;
+        }
+        .glass-panel {
+            background: rgba(255, 255, 255, 0.7);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.5);
+        }
+        .gradient-text {
+            background: linear-gradient(135deg, #7C3AED, #14B8A6);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        .soft-gradient-bg {
+            background: linear-gradient(135deg, #F5F3FF 0%, #F0FDFA 100%);
+        }
+        .hero-blob {
+            position: absolute;
+            border-radius: 50%;
+            filter: blur(80px);
+            opacity: 0.6;
+            z-index: 0;
+        }
+    </style>
+</head>
+<body>
+    <div id="root"></div>
+
+    <script type="text/babel">
+        const { useState, useEffect } = React;
+
+        const Icon = ({ name, size = 24, className = "" }) => {
+            const iconRef = React.useRef(null);
+
+            React.useEffect(() => {
+                if (window.lucide) {
+                    window.lucide.createIcons({
+                        root: iconRef.current,
+                        name: name,
+                        attrs: {
+                            width: size,
+                            height: size,
+                            class: className
+                        }
+                    });
+                }
+            }, [name, size, className]);
+
+            return <span ref={iconRef} className="inline-flex items-center justify-center">
+                <i data-lucide={name}></i>
+            </span>;
+        };
+
+        const Button = ({ children, variant = 'primary', className = '', onClick }) => {
+            const baseStyle = "px-8 py-4 rounded-full font-medium transition-all duration-300 transform hover:-translate-y-1 shadow-lg hover:shadow-xl flex items-center justify-center gap-2";
+            const variants = {
+                primary: "bg-gradient-to-r from-violet-600 to-teal-500 text-white shadow-violet-200",
+                secondary: "bg-white text-slate-700 border border-slate-200 hover:border-violet-300 shadow-slate-100",
+                outline: "border-2 border-violet-600 text-violet-700 hover:bg-violet-50"
+            };
+
+            return (
+                <button onClick={onClick} className={`${baseStyle} ${variants[variant]} ${className}`}>
+                    {children}
+                </button>
+            );
+        };
+
+        const Card = ({ title, text, icon, accent = false }) => (
+            <div className={`p-8 rounded-3xl transition-all duration-300 hover:shadow-2xl h-full flex flex-col ${accent ? 'bg-gradient-to-br from-violet-600 to-teal-600 text-white shadow-xl' : 'glass-panel hover:bg-white'}`}>
+                <div className={`mb-6 p-4 rounded-2xl w-fit ${accent ? 'bg-white/20' : 'bg-violet-50 text-violet-600'}`}>
+                    <Icon name={icon} size={32} />
+                </div>
+                <h3 className={`text-xl font-bold mb-3 ${accent ? 'text-white' : 'text-slate-800'}`}>{title}</h3>
+                <p className={`leading-relaxed ${accent ? 'text-violet-50' : 'text-slate-500'}`}>{text}</p>
+            </div>
+        );
+
+        const Modal = ({ isOpen, onClose }) => {
+            if (!isOpen) return null;
+            return (
+                <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+                    <div className="absolute inset-0 bg-slate-900/60 backdrop-blur-sm" onClick={onClose}></div>
+                    <div className="relative bg-white rounded-3xl p-8 max-w-md w-full shadow-2xl animate-fade-in">
+                        <button onClick={onClose} className="absolute top-4 right-4 text-slate-400 hover:text-slate-600">
+                            <Icon name="x" size={24} />
+                        </button>
+                        <h3 className="text-2xl font-bold font-serif text-slate-800 mb-2">Запись на прием</h3>
+                        <p className="text-slate-500 mb-6">Оставьте свои контакты, и я свяжусь с вами для подтверждения времени.</p>
+                        <form className="space-y-4" onSubmit={(e) => { e.preventDefault(); alert("Спасибо! Заявка отправлена (демо)."); onClose(); }}>
+                            <input type="text" placeholder="Ваше имя" className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:border-violet-500 focus:ring-2 focus:ring-violet-200 outline-none transition-all" required />
+                            <input type="tel" placeholder="Номер телефона" className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:border-violet-500 focus:ring-2 focus:ring-violet-200 outline-none transition-all" required />
+                            <select className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:border-violet-500 focus:ring-2 focus:ring-violet-200 outline-none transition-all bg-white">
+                                <option>Первичный прием</option>
+                                <option>Бесплатная консультация</option>
+                                <option>Остеопрактика</option>
+                            </select>
+                            <Button className="w-full justify-center">Отправить заявку</Button>
+                        </form>
+                        <p className="text-xs text-center text-slate-400 mt-4">Нажимая кнопку, вы соглашаетесь с политикой конфиденциальности</p>
+                    </div>
+                </div>
+            );
+        };
+
+        const App = () => {
+            const [isMenuOpen, setIsMenuOpen] = useState(false);
+            const [isModalOpen, setIsModalOpen] = useState(false);
+
+            useEffect(() => {
+                if (window.lucide) {
+                    window.lucide.createIcons();
+                }
+            });
+
+            const scrollTo = (id) => {
+                const element = document.getElementById(id);
+                if (element) {
+                    element.scrollIntoView({ behavior: 'smooth' });
+                    setIsMenuOpen(false);
+                }
+            };
+
+            return (
+                <div className="overflow-hidden">
+                    {/* Navigation */}
+                    <nav className="fixed top-0 w-full z-40 glass-panel border-b-0">
+                        <div className="max-w-7xl mx-auto px-6 py-4 flex justify-between items-center">
+                            <div className="flex items-center gap-2">
+                                <div className="w-10 h-10 rounded-full bg-gradient-to-r from-violet-600 to-teal-500 flex items-center justify-center text-white font-serif font-bold text-xl">
+                                    O
+                                </div>
+                                <span className="font-serif font-bold text-xl tracking-tight text-slate-800">
+                                    Олег Тетченко
+                                </span>
+                            </div>
+
+                            {/* Desktop Menu */}
+                            <div className="hidden md:flex gap-8 items-center text-sm font-medium text-slate-600">
+                                <button onClick={() => scrollTo('problems')} className="hover:text-violet-600 transition-colors">Симптомы</button>
+                                <button onClick={() => scrollTo('method')} className="hover:text-violet-600 transition-colors">Метод</button>
+                                <button onClick={() => scrollTo('about')} className="hover:text-violet-600 transition-colors">Обо мне</button>
+                                <button onClick={() => scrollTo('reviews')} className="hover:text-violet-600 transition-colors">Отзывы</button>
+                                <button onClick={() => scrollTo('contacts')} className="hover:text-violet-600 transition-colors">Контакты</button>
+                                <button onClick={() => setIsModalOpen(true)} className="px-5 py-2 rounded-full border border-violet-200 text-violet-700 hover:bg-violet-50 transition-all">
+                                    Записаться
+                                </button>
+                            </div>
+
+                            {/* Mobile Menu Button */}
+                            <button className="md:hidden text-slate-700" onClick={() => setIsMenuOpen(!isMenuOpen)}>
+                                <Icon name={isMenuOpen ? "x" : "menu"} size={28} />
+                            </button>
+                        </div>
+
+                        {/* Mobile Menu Dropdown */}
+                        {isMenuOpen && (
+                            <div className="md:hidden absolute top-full left-0 w-full bg-white border-b border-slate-100 p-6 flex flex-col gap-4 shadow-xl animate-fade-in">
+                                <button onClick={() => scrollTo('problems')} className="text-left text-lg font-medium">Симптомы</button>
+                                <button onClick={() => scrollTo('method')} className="text-left text-lg font-medium">Метод</button>
+                                <button onClick={() => scrollTo('prices')} className="text-left text-lg font-medium">Услуги и цены</button>
+                                <button onClick={() => scrollTo('contacts')} className="text-left text-lg font-medium">Контакты</button>
+                                <Button onClick={() => setIsModalOpen(true)} className="w-full justify-center">Записаться на прием</Button>
+                            </div>
+                        )}
+                    </nav>
+
+                    {/* Hero Section */}
+                    <header className="relative min-h-screen flex items-center pt-20 soft-gradient-bg">
+                        <div className="hero-blob bg-violet-300 w-96 h-96 top-0 right-0 -mr-20 -mt-20"></div>
+                        <div className="hero-blob bg-teal-200 w-80 h-80 bottom-0 left-0 -ml-20 -mb-20"></div>
+
+                        <div className="max-w-7xl mx-auto px-6 grid md:grid-cols-2 gap-12 items-center relative z-10">
+                            <div className="order-2 md:order-1 space-y-8">
+                                <div className="inline-block px-4 py-2 rounded-full bg-white/50 border border-violet-100 text-violet-700 text-sm font-semibold tracking-wide uppercase">
+                                    Кинезиология • Остеопрактика • Нутрициология
+                                </div>
+                                <h1 className="text-5xl md:text-6xl lg:text-7xl font-bold text-slate-900 leading-tight">
+                                    Верните телу <br/>
+                                    <span className="gradient-text italic">свободу движения</span>
+                                </h1>
+                                <p className="text-lg text-slate-600 max-w-lg leading-relaxed">
+                                    Комплексное восстановление здоровья и избавление от боли без лекарств и операций. Мягкие техники для баланса вашего организма.
+                                </p>
+
+                                <div className="flex flex-col sm:flex-row gap-4">
+                                    <Button onClick={() => setIsModalOpen(true)}>
+                                        Записаться на прием
+                                        <Icon name="arrow-right" size={20} />
+                                    </Button>
+                                    <Button variant="secondary" onClick={() => setIsModalOpen(true)}>
+                                        Бесплатная консультация
+                                    </Button>
+                                </div>
+
+                                <div className="pt-8 border-t border-slate-200 flex gap-8">
+                                    <div>
+                                        <p className="text-3xl font-bold font-serif text-slate-800">7+</p>
+                                        <p className="text-sm text-slate-500">лет опыта</p>
+                                    </div>
+                                    <div>
+                                        <p className="text-3xl font-bold font-serif text-slate-800">1000+</p>
+                                        <p className="text-sm text-slate-500">довольных клиентов</p>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div className="order-1 md:order-2 relative flex justify-center">
+                                <div className="relative w-full max-w-md aspect-[4/5] rounded-[3rem] overflow-hidden shadow-2xl border-8 border-white">
+                                    <img
+                                        src="https://static.tildacdn.com/tild3035-6363-4839-b938-336462636366/_-1.png"
+                                        alt="Олег Тетченко"
+                                        className="w-full h-full object-contain object-bottom"
+                                    />
+                                    <div className="absolute bottom-0 left-0 w-full h-1/3 bg-gradient-to-t from-violet-900/40 to-transparent"></div>
+                                    <div className="absolute bottom-8 left-8 text-white">
+                                        <p className="font-serif text-2xl font-bold">Олег Тетченко</p>
+                                        <p className="opacity-90">Ваш специалист по здоровью</p>
+                                    </div>
+                                </div>
+                                <div className="absolute top-10 -right-4 bg-white p-4 rounded-2xl shadow-xl flex items-center gap-3 animate-bounce duration-[3000ms]">
+                                    <div className="p-2 bg-teal-100 text-teal-600 rounded-full">
+                                        <Icon name="shield-check" size={24} />
+                                    </div>
+                                    <div>
+                                        <p className="text-xs text-slate-500">Безопасно</p>
+                                        <p className="font-bold text-sm text-slate-800">Мягкие методики</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </header>
+
+                    {/* Problems Section */}
+                    <section id="problems" className="py-24 bg-white">
+                        <div className="max-w-7xl mx-auto px-6">
+                            <div className="text-center max-w-2xl mx-auto mb-16">
+                                <h2 className="text-4xl font-bold text-slate-900 mb-4">Когда стоит обратиться?</h2>
+                                <p className="text-slate-500">Если вы устали бороться с симптомами и хотите найти истинную причину недомогания.</p>
+                            </div>
+
+                            <div className="grid md:grid-cols-3 gap-6">
+                                <Card icon="activity" title="Боли в спине и шее" text="Острые и ноющие боли, прострелы, дискомфорт при сидении или после сна." />
+                                <Card icon="battery-low" title="Хроническая усталость" text="Отсутствие энергии даже после отдыха, нарушения сна, апатия." />
+                                <Card icon="users" title="После родов" text="Восстановление таза, устранение диастаза, работа со шрамами и спайками." />
+                                <Card icon="move" title="Ограниченная подвижность" text="Тяжесть в суставах, скованность движений, восстановление после травм." />
+                                <Card icon="smile" title="Головные боли" text="Мигрени, головокружения, зависимость от погоды, напряжение в висках." />
+                                <Card icon="user-check" title="Нарушения осанки" text="Сутулость, сколиоз, перекос таза, разная длина ног." accent={true} />
+                            </div>
+                        </div>
+                    </section>
+
+                    {/* Method Section */}
+                    <section id="method" className="py-24 bg-slate-50 relative overflow-hidden">
+                        <div className="max-w-7xl mx-auto px-6 grid md:grid-cols-2 gap-16 items-center">
+                            <div className="relative">
+                                <div className="absolute inset-0 bg-gradient-to-tr from-violet-200 to-teal-200 rounded-full blur-3xl opacity-30"></div>
+                                <div className="relative glass-panel p-8 rounded-3xl border border-white/60">
+                                    <h3 className="text-2xl font-bold mb-6 font-serif">В чем суть метода?</h3>
+                                    <ul className="space-y-4">
+                                        {[
+                                            "Организм — это единая система. Боль в колене может быть вызвана проблемой в шее.",
+                                            "Я не «хрущу» костями. Работа идет мягко через поиск первопричины.",
+                                            "Кинезиология позволяет телу самому «рассказать», где находится сбой, через мышечный тест."
+                                        ].map((item, i) => (
+                                            <li key={i} className="flex gap-4 items-start">
+                                                <div className="min-w-[24px] text-teal-500 mt-1">
+                                                    <Icon name="check-circle" size={24} />
+                                                </div>
+                                                <p className="text-slate-600">{item}</p>
+                                            </li>
+                                        ))}
+                                    </ul>
+                                </div>
+                            </div>
+                            <div>
+                                <h2 className="text-4xl font-bold text-slate-900 mb-6">Больше, чем просто <br/>массаж или лечение</h2>
+                                <p className="text-slate-600 mb-6 leading-relaxed">
+                                    Классическая медицина часто лечит симптомы. Моя задача как кинезиолога и остеопракта — найти тот самый «выключенный рубильник» в вашей нервной системе, который запустил болезнь.
+                                </p>
+                                <p className="text-slate-600 mb-8 leading-relaxed">
+                                    Мы работаем на трех уровнях: <b>Структура</b> (мышцы, кости), <b>Биохимия</b> (обмен веществ) и <b>Эмоции</b>.
+                                </p>
+                                <Button variant="outline" onClick={() => setIsModalOpen(true)}>Узнать подробнее</Button>
+                            </div>
+                        </div>
+                    </section>
+
+                    {/* Steps Section */}
+                    <section className="py-24 bg-white">
+                        <div className="max-w-7xl mx-auto px-6">
+                            <h2 className="text-4xl font-bold text-slate-900 mb-12 text-center">Как проходит прием</h2>
+
+                            <div className="grid md:grid-cols-4 gap-8">
+                                {[
+                                    { step: "01", title: "Диагностика", desc: "Беседа, визуальный осмотр осанки и анализ ваших жалоб." },
+                                    { step: "02", title: "Тестирование", desc: "Мануально-мышечный тест (ММТ) для поиска слабых звеньев в цепи организма." },
+                                    { step: "03", title: "Коррекция", desc: "Мягкое воздействие на триггерные точки, фасции и связки. Без боли." },
+                                    { step: "04", title: "Рекомендации", desc: "Подбор упражнений и нутрицевтиков для закрепления результата." }
+                                ].map((item, i) => (
+                                    <div key={i} className="relative group">
+                                        <div className="text-6xl font-serif font-bold text-slate-100 mb-4 group-hover:text-violet-100 transition-colors">{item.step}</div>
+                                        <h3 className="text-xl font-bold text-slate-800 mb-2 relative z-10">{item.title}</h3>
+                                        <p className="text-sm text-slate-500 relative z-10">{item.desc}</p>
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+                    </section>
+
+                    {/* Services & Prices */}
+                    <section id="prices" className="py-24 soft-gradient-bg">
+                        <div className="max-w-7xl mx-auto px-6">
+                            <div className="flex flex-col md:flex-row justify-between items-end mb-12 gap-6">
+                                <div>
+                                    <h2 className="text-4xl font-bold text-slate-900 mb-2">Услуги и стоимость</h2>
+                                    <p className="text-slate-500">Инвестиция в ваше здоровье и долголетие</p>
+                                </div>
+                                <div className="flex items-center gap-2 px-4 py-2 bg-white rounded-full text-sm font-medium text-teal-600 shadow-sm">
+                                    <Icon name="clock" size={16} />
+                                    Длительность приема: 50-60 минут
+                                </div>
+                            </div>
+
+                            <div className="grid md:grid-cols-3 gap-8">
+                                <div className="bg-white p-8 rounded-3xl shadow-lg border border-slate-100 flex flex-col hover:-translate-y-2 transition-transform">
+                                    <div className="mb-4 p-3 bg-slate-100 rounded-2xl w-fit"><Icon name="message-circle" /></div>
+                                    <h3 className="text-2xl font-bold mb-2">Бесплатная консультация</h3>
+                                    <p className="text-slate-500 text-sm mb-6 flex-grow">Краткий разбор вашей ситуации по телефону или в мессенджере. Поймем, смогу ли я вам помочь.</p>
+                                    <div className="text-3xl font-serif font-bold text-slate-800 mb-6">0 ₽</div>
+                                    <Button variant="secondary" onClick={() => setIsModalOpen(true)} className="w-full justify-center">Записаться</Button>
+                                </div>
+
+                                <div className="bg-white p-8 rounded-3xl shadow-xl border-2 border-violet-500 relative flex flex-col hover:-translate-y-2 transition-transform">
+                                    <div className="absolute top-0 right-0 bg-вiolet-600 text-white text-xs font-bold px-3 py-1 rounded-bl-xl rounded-tr-2xl">ПОПУЛЯРНО</div>
+                                    <div className="mb-4 п-3 bg-вiolet-100 text-вiolet-600 rounded-2xl w-fit"><Icon name="zap" /></div>
+                                    <h3 className="text-2xl font-bold mb-2">Первичный прием</h3>
+                                    <p className="text-slate-500 text-sm mb-6 flex-grow">Полная диагностика всего организма, поиск причин боли и первая коррекция.</p>
+                                    <div className="text-3xl font-serif font-bold text-slate-800 mb-6">5 000 ₽</div>
+                                    <Button onClick={() => setIsModalOpen(true)} className="w-full justify-center">Записаться</Button>
+                                </div>
+
+                                <div className="bg-white п-8 rounded-3xl shadow-lg border border-slate-100 flex flex-col hover:-translate-y-2 transition-transform">
+                                    <div className="mb-4 п-3 bg-teal-100 text-teal-600 rounded-2xl w-fit"><Icon name="activity" /></div>
+                                    <h3 className="text-2xl font-bold mb-2">Курс реабилитации</h3>
+                                    <p className="text-slate-500 text-sm mb-6 flex-grow">Для сложных хронических случаев. Глубокая проработка и восстановление.</p>
+                                    <div className="text-3xl font-serif font-bold text-slate-800 mb-6">от 4 000 ₽</div>
+                                    <Button variant="secondary" onClick={() => setIsModalOpen(true)} className="w-full justify-center">Узнать подробнее</Button>
+                                </div>
+                            </div>
+                        </div>
+                    </section>
+
+                    {/* About Specialist */}
+                    <section id="about" className="py-24 bg-white">
+                        <div className="max-w-7xl mx-auto px-6">
+                            <div className="bg-slate-900 rounded-[3rem] text-white p-8 md:p-16 overflow-hidden relative">
+                                <div className="absolute top-0 right-0 w-96 h-96 bg-вiolet-600 blur-[100px] opacity-40 rounded-full"></div>
+                                <div className="relative z-10 grid md:grid-cols-2 gap-12 items-center">
+                                    <div>
+                                        <h2 className="text-4xl md:text-5xl font-bold font-serif mb-6">Олег Тетченко</h2>
+                                        <p className="text-slate-300 mb-6 text-lg leading-relaxed">
+                                            Специалист по оздоровлению с медицинским подходом. Более 7 лет я помогаю людям возвращать радость движения без боли.
+                                        </p>
+                                        <div className="space-y-4 mb-8">
+                                            <div className="flex items-center gap-3">
+                                                <div className="w-2 h-2 rounded-full bg-teal-400"></div>
+                                                <p>Дипломированный специалист</p>
+                                            </div>
+                                            <div className="flex items-center gap-3">
+                                                <div className="w-2 h-2 rounded-full bg-teal-400"></div>
+                                                <p>Индивидуальный подход к каждому случаю</p>
+                                            </div>
+                                            <div className="flex items-center gap-3">
+                                                <div className="w-2 h-2 rounded-full bg-teal-400"></div>
+                                                <p>Постоянное повышение квалификации</p>
+                                            </div>
+                                        </div>
+                                        <div className="flex gap-4">
+                                            <a href="#" className="p-3 bg-white/10 rounded-full hover:bg-white/20 transition-colors"><Icon name="instagram" /></a>
+                                            <a href="#" className="p-3 bg-white/10 rounded-full hover:bg-white/20 transition-colors"><Icon name="send" /></a>
+                                        </div>
+                                    </div>
+                                    <div className="relative h-full min-h-[300px] rounded-3xl bg-slate-800 overflow-hidden border border-slate-700">
+                                        <img
+                                            src="https://static.tildacdn.com/tild3035-6363-4839-b938-336462636366/_-1.png"
+                                            alt="Олег Тетченко"
+                                            className="absolute inset-0 w-full h-full object-cover object-top"
+                                        />
+                                        <div className="absolute inset-0 bg-slate-900/40"></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </section>
+
+                    {/* Reviews */}
+                    <section id="reviews" className="py-24 bg-slate-50">
+                        <div className="max-w-7xl mx-auto px-6">
+                            <h2 className="text-4xl font-bold text-center mb-16">Отзывы пациентов</h2>
+                            <div className="grid md:grid-cols-3 gap-8">
+                                {[
+                                    { name: "Анна К.", text: "Пришла с дикой болью в пояснице после родов. Олег за один сеанс нашел причину и снял острый спазм. Очень деликатный подход!", stars: 5 },
+                                    { name: "Дмитрий В.", text: "Мучали головные боли годами. Врачи разводили руками. Оказалось — зажим в шейном отделе. После курса чувствую себя другим человеком.", stars: 5 },
+                                    { name: "Елена М.", text: "Нравится, что здесь не просто 'хрустят', а объясняют, что происходит с телом. Очень мягкие техники, после приема такая легкость!", stars: 5 }
+                                ].map((review, i) => (
+                                    <div key={i} className="bg-white p-8 rounded-3xl shadow-sm hover:shadow-md transition-shadow">
+                                        <div className="flex gap-1 text-yellow-400 mb-4">
+                                            {[...Array(review.stars)].map((_, j) => <Icon key={j} name="star" size={16} className="fill-current" />)}
+                                        </div>
+                                        <p className="text-slate-600 mb-6 italic">"{review.text}"</p>
+                                        <p className="font-bold text-slate-900">{review.name}</p>
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+                    </section>
+
+                    {/* Contacts & Footer */}
+                    <footer id="contacts" className="bg-white pt-24 pb-12">
+                        <div className="max-w-7xl mx-auto px-6">
+                            <div className="grid md:grid-cols-2 gap-12 mb-16">
+                                <div>
+                                    <h2 className="text-4xl font-bold mb-8">Контакты</h2>
+                                    <div className="space-y-6 text-lg">
+                                        <div className="flex items-start gap-4">
+                                            <div className="p-3 bg-violet-50 text-violet-600 rounded-full"><Icon name="map-pin" /></div>
+                                            <div>
+                                                <p className="font-bold text-slate-900">Адрес</p>
+                                                <p className="text-slate-500">г. Ноябрьск, ул. Ленина, д. 15 (пример)</p>
+                                            </div>
+                                        </div>
+                                        <div className="flex items-start gap-4">
+                                            <div className="p-3 bg-violet-50 text-вiolet-600 rounded-full"><Icon name="phone" /></div>
+                                            <div>
+                                                <p className="font-bold text-slate-900">Телефон</p>
+                                                <a href="tel:+79000000000" className="text-slate-500 hover:text-вiolet-600 transition-colors">+7 (900) 000-00-00</a>
+                                            </div>
+                                        </div>
+                                        <div className="flex gap-4 mt-8">
+                                            <Button className="flex-1 bg-green-500 hover:bg-green-600 shadow-green-200 from-green-500 to-green-600">
+                                                <Icon name="message-circle" size={20} /> WhatsApp
+                                            </Button>
+                                            <Button className="flex-1 bg-sky-500 hover:bg-sky-600 shadow-sky-200 from-sky-500 to-sky-600">
+                                                <Icon name="send" size={20} /> Telegram
+                                            </Button>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div className="h-[400px] bg-slate-100 rounded-3xl overflow-hidden relative">
+                                    <div className="absolute inset-0 flex items-center justify-center bg-slate-200 text-slate-400">
+                                        <p>Интерактивная карта (Яндекс/Google)</p>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div className="border-t border-slate-100 pt-8 flex flex-col md:flex-row justify-between items-center text-slate-400 text-sm">
+                                <p>© 2023-2024 Олег Тетченко. Все права защищены.</p>
+                                <div className="flex gap-6 mt-4 md:mt-0">
+                                    <a href="#" className="hover:text-slate-600">Политика конфиденциальности</a>
+                                    <a href="#" className="hover:text-slate-600">Договор оферты</a>
+                                </div>
+                            </div>
+                        </div>
+                    </footer>
+
+                    <Modal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} />
+                </div>
+            );
+        };
+
+        const root = ReactDOM.createRoot(document.getElementById('root'));
+        root.render(<App />);
+    </script>
+</body>
+</html>
